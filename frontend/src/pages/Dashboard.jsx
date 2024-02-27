@@ -1,58 +1,58 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
 import GoalForm from "../components/GoalForm";
 import GoalItem from "../components/GoalItem";
-import Spinner from "../components/Spinner";
-import { getGoals, reset } from "../features/goals/goalSlice";
+import axios from "axios";
 
-function Dashboard() {
+function Dashboard({ user }) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const { user } = useSelector((state) => state.auth);
-  const { goals, isLoading, isError, message } = useSelector(
-    (state) => state.goals
-  );
+  const [goals, setGoals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isError) {
-      console.log(message);
-    }
-
     if (!user) {
       navigate("/login");
+    } else {
+      // Fetch goals when the user is available
+      const token = localStorage.getItem("token");
+      getGoals(token);
     }
+  }, [user]); // Include user as a dependency to re-run effect when user changes
 
-    dispatch(getGoals());
-
-    return () => {
-      dispatch(reset());
-    };
-  }, [user, navigate, isError, message, dispatch]);
-
-  if (isLoading) {
-    return <Spinner />;
-  }
+  const getGoals = async (token) => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.get("/api/goals/", config);
+      setGoals(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching goals:", error);
+    }
+  };
+  console.log(goals);
 
   return (
     <>
       <section className='heading'>
-        <h1>Welcome {user && user.name}</h1>
+        <h1>Welcome {user.name}</h1>
         <p>Goals Dashboard</p>
       </section>
-
       <GoalForm />
-
       <section className='content'>
-        {goals.length > 0 ? (
+        {loading ? (
+          <h1>Loading...</h1>
+        ) : goals.length > 0 ? (
           <div className='goals'>
             {goals.map((goal) => (
               <GoalItem key={goal._id} goal={goal} />
             ))}
           </div>
         ) : (
-          <h3>You have not set any goals</h3>
+          <h1>You haveGoals</h1>
         )}
       </section>
     </>
