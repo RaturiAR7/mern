@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import GoalForm from "../components/GoalForm";
 import GoalItem from "../components/GoalItem";
-import axios from "axios";
+import { GoalContext } from "../Context/Goals";
+import { getGoals } from "../Utils";
 
 function Dashboard({ user }) {
   const navigate = useNavigate();
-  const [goals, setGoals] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const goalState = useContext(GoalContext);
+  const { goals, setGoals } = goalState;
 
   useEffect(() => {
     if (!user) {
@@ -15,25 +16,9 @@ function Dashboard({ user }) {
     } else {
       // Fetch goals when the user is available
       const token = localStorage.getItem("token");
-      getGoals(token);
+      getGoals(token, setGoals);
     }
   }, [user]); // Include user as a dependency to re-run effect when user changes
-
-  const getGoals = async (token) => {
-    try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-      const response = await axios.get("/api/goals/", config);
-      setGoals(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching goals:", error);
-    }
-  };
-  console.log(goals);
 
   return (
     <>
@@ -41,22 +26,19 @@ function Dashboard({ user }) {
         <h1>Welcome {user.name}</h1>
         <p>Goals Dashboard</p>
       </section>
-      <GoalForm />
+      <GoalForm setGoals={setGoals} goals={goals} />
       <section className='content'>
-        {loading ? (
-          <h1>Loading...</h1>
-        ) : goals.length > 0 ? (
+        {goals && goals.length > 0 ? (
           <div className='goals'>
             {goals.map((goal) => (
               <GoalItem key={goal._id} goal={goal} />
             ))}
           </div>
         ) : (
-          <h1>You haveGoals</h1>
+          <h1>You have no Goals</h1>
         )}
       </section>
     </>
   );
 }
-
 export default Dashboard;

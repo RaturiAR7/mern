@@ -28,7 +28,6 @@ function Login({ login }) {
       login(userData);
       // Navigation should happen after successful login
       navigate("/");
-      console.log("Logged in successfully");
     } catch (error) {
       console.error("Login failed:", error);
       // Handle login failure (e.g., show error message to the user)

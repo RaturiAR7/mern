@@ -64,7 +64,6 @@ function App() {
       throw error;
     }
   };
-  console.log(isAuthenticated);
   return (
     <>
       <Router>

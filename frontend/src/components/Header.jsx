@@ -1,12 +1,9 @@
 import { FaSignInAlt, FaSignOutAlt, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { logout, reset } from "../features/auth/authSlice";
 
 function Header({ isAuthenticated, setIsAuthenticated }) {
   const navigate = useNavigate();
   const onLogout = () => {
-    console.log("onLogout");
     localStorage.removeItem("token");
     setIsAuthenticated(false);
     navigate("/login");
