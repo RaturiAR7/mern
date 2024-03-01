@@ -1,62 +1,44 @@
-import { useEffect } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
 import GoalForm from "../components/GoalForm";
 import GoalItem from "../components/GoalItem";
-import Spinner from "../components/Spinner";
-import { getGoals, reset } from "../features/goals/goalSlice";
+import { GoalContext } from "../Context/Goals";
+import { getGoals } from "../Utils";
 
-function Dashboard() {
+function Dashboard({ user }) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const { user } = useSelector((state) => state.auth);
-  const { goals, isLoading, isError, message } = useSelector(
-    (state) => state.goals
-  );
+  const goalState = useContext(GoalContext);
+  const { goals, setGoals } = goalState;
 
   useEffect(() => {
-    if (isError) {
-      console.log(message);
-    }
-
     if (!user) {
       navigate("/login");
+    } else {
+      // Fetch goals when the user is available
+      const token = localStorage.getItem("token");
+      getGoals(token, setGoals);
     }
-
-    dispatch(getGoals());
-
-    return () => {
-      dispatch(reset());
-    };
-  }, [user, navigate, isError, message, dispatch]);
-
-  if (isLoading) {
-    return <Spinner />;
-  }
+  }, [user]); // Include user as a dependency to re-run effect when user changes
 
   return (
     <>
       <section className='heading'>
-        <h1>Welcome {user && user.name}</h1>
+        <h1>Welcome {user.name}</h1>
         <p>Goals Dashboard</p>
       </section>
-
-      <GoalForm />
-
+      <GoalForm setGoals={setGoals} goals={goals} />
       <section className='content'>
-        {goals.length > 0 ? (
+        {goals && goals.length > 0 ? (
           <div className='goals'>
             {goals.map((goal) => (
               <GoalItem key={goal._id} goal={goal} />
             ))}
           </div>
         ) : (
-          <h3>You have not set any goals</h3>
+          <h1>You have no Goals</h1>
         )}
       </section>
     </>
   );
 }
-
 export default Dashboard;

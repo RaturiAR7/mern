@@ -1,17 +1,12 @@
 import { FaSignInAlt, FaSignOutAlt, FaUser } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { logout, reset } from "../features/auth/authSlice";
 
-function Header() {
+function Header({ isAuthenticated, setIsAuthenticated }) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
-
   const onLogout = () => {
-    dispatch(logout());
-    dispatch(reset());
-    navigate("/");
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
+    navigate("/login");
   };
 
   return (
@@ -20,7 +15,7 @@ function Header() {
         <Link to='/'>GoalSetter</Link>
       </div>
       <ul>
-        {user ? (
+        {isAuthenticated ? (
           <li>
             <button className='btn' onClick={onLogout}>
               <FaSignOutAlt /> Logout

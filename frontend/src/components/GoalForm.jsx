@@ -1,17 +1,23 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { createGoal } from "../features/goals/goalSlice";
+import { useState, useContext } from "react";
+import axios from "axios";
+import { GoalContext } from "../Context/Goals";
+import { createGoal } from "../Utils";
 
 function GoalForm() {
   const [text, setText] = useState("");
+  const goalState = useContext(GoalContext);
+  const { goals, setGoals } = goalState;
 
-  const dispatch = useDispatch();
-
+  ///// Get User's Goals
   const onSubmit = (e) => {
     e.preventDefault();
-
-    dispatch(createGoal({ text }));
-    setText("");
+    const token = localStorage.getItem("token");
+    try {
+      createGoal({ text: text }, token, setGoals);
+      setText("");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
